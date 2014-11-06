@@ -29,7 +29,8 @@ before_script:
  - ls -la /usr/local/bin
  - createuser -d -I -l -r -S fossy
  - psql postgres -c "alter role fossy password 'fossy'"
- - mkdir -p /srv/fossology
+ - sudo mkdir -p /srv/fossology
+ - sudo chown a+rwx /srv/fossology
 
 script:
  - make
