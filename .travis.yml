@@ -31,9 +31,13 @@ before_script:
  - psql postgres -c "alter role fossy password 'fossy'"
  - sudo mkdir -p /srv/fossology
  - sudo chmod a+rwx /srv/fossology
+ - php src/testing/db/createTestEnvironment.php
 
 script:
  - make
- - (cd src; vendor/bin/phpunit)
+ - (cd src; vendor/bin/phpunit lib/php)
  - cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ src/
 
+after_script:
+ - pwd
+ - php src/testing/db/purgeTestEnvironment.php
