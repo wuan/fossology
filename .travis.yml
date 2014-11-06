@@ -24,9 +24,12 @@ install:
 before_script:
  - wget http://getcomposer.org/composer.phar
  - php composer.phar install -d src
+ - ls -la /usr/local/bin
+ - createuser -d fossy
+ - psql postgres -c "alter role fossy password 'fossy'"
 
 script:
- - (cd src; vendor/bin/phpunit)
  - make
+ - (cd src; vendor/bin/phpunit)
  - cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ src/
 
