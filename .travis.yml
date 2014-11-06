@@ -30,7 +30,7 @@ before_script:
  - createuser -d -I -l -r -S fossy
  - psql postgres -c "alter role fossy password 'fossy'"
  - sudo mkdir -p /srv/fossology
- - sudo chown a+rwx /srv/fossology
+ - sudo chmod a+rwx /srv/fossology
 
 script:
  - make
