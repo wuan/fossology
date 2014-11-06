@@ -23,7 +23,9 @@ install:
 
 before_script:
  - wget http://getcomposer.org/composer.phar
- - php composer.phar install -d src
+ - mv composer.phar /usr/local/bin/composer
+ - chmod +x /usr/local/bin/composer
+ - composer install -d src
  - ls -la /usr/local/bin
  - createuser -d fossy
  - psql postgres -c "alter role fossy password 'fossy'"
