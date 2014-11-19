@@ -44,7 +44,7 @@ matrix:
        - chmod 0600 ~/.pgpass
        - cat ~/.pgpass
       script:
-       - mak
+       - make
        - curl -sS https://getcomposer.org/installer | php
        - sudo mv composer.phar /usr/local/bin/composer
        - cd src && composer install && composer update && cd ..
