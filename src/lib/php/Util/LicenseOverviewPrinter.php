@@ -129,7 +129,7 @@ class LicenseOverviewPrinter extends Object
    * @return string
    */
   function createLicenseOverview($licenseMatches, $uploadId, $uploadTreeId,
-          $selectedAgentId=0, $selectedLicenseId=0, $selectedLicenseFileId=0, $hasHighlights=false, $showReadOnly=true)
+          $selectedAgentId=0, $selectedLicenseId=0, $selectedLicenseFileId=0, $hasHighlights=false, $showReadOnly=true, $editLicense=true)
   {
     if (count($licenseMatches)==0)
     {
@@ -153,10 +153,12 @@ class LicenseOverviewPrinter extends Object
       $breakCounter = 0;
       foreach ($agents as $agentName => $foundLicenses)
       {
-        if($breakCounter++ > 0) $output .= "<br/>";
+        if($breakCounter++ > 0) {
+            $output .= "<br/>";
+        }
         $latestAgentId = $agentLatestMap[$agentName]['latest'];
         $output .= $this->renderMatches($foundLicenses,$agentName,$latestAgentId,$agentLatestMap[$agentName]['ars'],
-                           $uploadId, $uploadTreeId, $selectedAgentId, $selectedLicenseId, $selectedLicenseFileId, $hasHighlights, $showReadOnly);
+                           $uploadId, $uploadTreeId, $selectedAgentId, $selectedLicenseId, $selectedLicenseFileId, $hasHighlights, $showReadOnly, $editLicense);
       }
     }
 
@@ -175,7 +177,7 @@ class LicenseOverviewPrinter extends Object
 
   
   private function renderMatches($foundLicenses,$agentName,$latestAgentId,$agentArs,
-          $uploadId, $uploadTreeId, $selectedAgentId, $selectedLicenseId, $selectedLicenseFileId, $hasHighlights, $showReadOnly)
+          $uploadId, $uploadTreeId, $selectedAgentId, $selectedLicenseId, $selectedLicenseFileId, $hasHighlights, $showReadOnly, $editLicense)
   {        
     $latestMatches = array();
     $obsoleteMatches = array();
@@ -214,8 +216,18 @@ class LicenseOverviewPrinter extends Object
         $output .= "<br/>\n";
         $output .= $this->printLicenseNameAsLink($licenseShortname);
         $output .= $this->createPercentInfoAndAnchors($uploadId, $uploadTreeId, $selectedAgentId, $selectedLicenseId, $selectedLicenseFileId, $hasHighlights, $agentDetails, $showReadOnly);
+		$permission = $_SESSION['UserLevel'];
+        if($agentName == "nomos" && $permission >= PERM_AUDIT && $editLicense) {
+		  $fl_fk = key($latestMatches[$licenseShortname]);
+		  $napk = $latestMatches[$licenseShortname][$fl_fk]['agentId'];
+          $infotext = _("Edit nomos license reference");
+		  $button_text = _("Edit license");
+          $output .= "<br/><a title='$infotext' href='" . Traceback_uri() ."?mod=nomos_change_license&fl_pk=$fl_fk";
+          $output .= "&upload=$uploadId&item=$uploadTreeId&napk=$napk";
+          $output .= "' style='color:#00aa00;font-style:mono;font-size:12px' class='buttonLink'>" .$button_text. "</a><br/>";
+        }
       }
-      $output .= '</b>';
+      $output .= '</b><br/>';
     }
 
     if(count($obsoleteMatches)>0)
@@ -227,6 +239,16 @@ class LicenseOverviewPrinter extends Object
         $output .= "<br/>\n";
         $output .= $this->printLicenseNameAsLink($licenseShortname);
         $output .= $this->createPercentInfoAndAnchors($uploadId, $uploadTreeId, $selectedAgentId, $selectedLicenseId, $selectedLicenseFileId, $hasHighlights, $agentDetails, $showReadOnly);
+		$permission = $_SESSION['UserLevel'];
+        if($agentName == "nomos" && $permission >= PERM_AUDIT && $editLicense) {
+		  $fl_fk = key($obsoleteMatches[$licenseShortname]);
+		  $napk = $obsoleteMatches[$licenseShortname][$fl_fk]['agentId'];
+          $infotext = _("Edit nomos license reference");
+		  $button_text = _("Edit license");
+          $output .= "<br/><a title='$infotext' href='" . Traceback_uri() ."?mod=nomos_change_license&fl_pk=$fl_fk";
+          $output .= "&upload=$uploadId&item=$uploadTreeId&napk=$napk";
+          $output .= "' style='color:#00aa00;font-style:mono;font-size:12px' class='buttonLink'>" .$button_text. "</a><br/>";
+        }
       }
       $output .= '</b><br/><br/>';
     }
@@ -317,7 +339,9 @@ class LicenseOverviewPrinter extends Object
     $col = $noConcludedLicenseYet ? '#ff0000' : '#00aa00';
     $text =$noConcludedLicenseYet ? _("Add concluded license") : _("Edit concluded license");
     /** go to the license change page */
-    if (plugin_find_id('change_license') >= 0)
+	$permission = $_SESSION['UserLevel'];
+//    if (plugin_find_id('change_license') >= 0)
+	if ($permission >= PERM_AUDIT)
     {
       $editLicenseText = _("Edit the license of this file");
       $output = '<a title="' . $editLicenseText . '" href="' . Traceback_uri() . '?mod=change_license';

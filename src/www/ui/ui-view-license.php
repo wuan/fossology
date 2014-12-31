@@ -255,11 +255,21 @@ class ui_view_license extends FO_Plugin
       $clearingDecWithLicenses = $this->clearingDao->getFileClearings($uploadTreeId);
       list($outputTMP, $foundNothing) = $this->licenseOverviewPrinter->createWrappedRecentLicenseClearing($clearingDecWithLicenses);
       $output .= $outputTMP;
-      $output .= $this->licenseOverviewPrinter->createEditButton($fileTreeBounds->getUploadId(), $uploadTreeId, $foundNothing);
+	  if (empty($clearingDecWithLicenses)) 
+	  {
+	      $output .= $this->licenseOverviewPrinter->createEditButton($fileTreeBounds->getUploadId(), $uploadTreeId, $foundNothing);
+	  }
 
       $licenseFileMatches = $this->licenseDao->getFileLicenseMatches($fileTreeBounds);
       $licenseMatches = $this->licenseProcessor->extractLicenseMatches($licenseFileMatches);
-      $output .= $this->licenseOverviewPrinter->createLicenseOverview($licenseMatches, $fileTreeBounds->getUploadId(), $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights);
+	  if (empty($clearingDecWithLicenses)) 
+	  {
+	    $output .= $this->licenseOverviewPrinter->createLicenseOverview($licenseMatches, $fileTreeBounds->getUploadId(), $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights, true, true);
+	  }
+	  else 
+	  {
+      	$output .= $this->licenseOverviewPrinter->createLicenseOverview($licenseMatches, $fileTreeBounds->getUploadId(), $uploadTreeId, $selectedAgentId, $licenseId, $highlightId, $hasHighlights, true, false);
+	  }
     }
     return $output;
   }

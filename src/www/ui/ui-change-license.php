@@ -142,10 +142,11 @@ class change_license extends FO_Plugin
     $licenseMatches = $this->licenseProcessor->extractLicenseMatches($licenseFileMatches);
     $output .= $this->licenseOverviewPrinter->createLicenseOverview($licenseMatches, $fileTreeBounds->getUploadId(), $uploadTreeId, 0, 0, 0, false, true);
     /** check if the current user has the permission to change license */
-    $permission = GetUploadPerm($uploadId);
+    $permission = $_SESSION['UserLevel'];
+//    $permission = GetUploadPerm($uploadId);
     $text = _("Audit License");
     $output .= "<H2>$text</H2>\n";
-    if ($permission >= PERM_WRITE)
+    if ($permission >= PERM_AUDIT)
     {
       $text = _("You do have write (or above permission) on this upload, thus you can change the license of this file.");
       $output .= "<b>$text</b>";

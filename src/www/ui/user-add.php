@@ -197,8 +197,10 @@ class user_add extends FO_Plugin {
         $V.= "<option value='" . PLUGIN_DB_NONE . "'>$text</option>\n";
         $text = _("Read-only (read, but no writes or downloads)");
         $V.= "<option selected value='" . PLUGIN_DB_READ . "'>$text</option>\n";
-        $text = _("Read-Write (read, download, or edit information)");
+        $text = _("Read-Write (read, download, scan and delete package)");
         $V.= "<option value='" . PLUGIN_DB_WRITE . "'>$text</option>\n";
+        $text = _("Audit (read, download, scan, audit licenses and delete package)");
+        $V.= "<option value='" . PLUGIN_DB_AUDIT . "'>$text</option>\n";
         $text = _("Full Administrator (all access including adding and deleting users)");
         $V.= "<option value='" . PLUGIN_DB_ADMIN . "'>$text</option>\n";
         $V.= "</select></td>\n";

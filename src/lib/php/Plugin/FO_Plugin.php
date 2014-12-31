@@ -33,6 +33,7 @@ define("PLUGIN_STATE_READY",2); // used during post-install
 define("PLUGIN_DB_NONE",0);
 define("PLUGIN_DB_READ",1);
 define("PLUGIN_DB_WRITE",3);	/* DB writes permitted */
+define("PLUGIN_DB_AUDIT",5);	/* License auditing rights. */
 define("PLUGIN_DB_ADMIN",10);	/* add/delete users */
 
 /**
@@ -41,14 +42,16 @@ define("PLUGIN_DB_ADMIN",10);	/* add/delete users */
  */
 define("PERM_NONE",0);   /* No permissions */
 define("PERM_READ",1);   /* Read only */
-define("PERM_WRITE",3);	 /* Create and write data. */
+define("PERM_WRITE",3);	 /* Uploading and scanning upload permitted. */
+define("PERM_AUDIT",5);	 /* License auditing rights. */
 define("PERM_ADMIN",10); /* Control permissions    */
 
 $NoneText = _("None");
 $ReadText = _("Read");
 $WriteText = _("Write");
+$AuditText = _("Audit");
 $AdminText = _("Admin");
-$GLOBALS['PERM_NAMES'] = array(PERM_NONE=>$NoneText, PERM_READ=>$ReadText, PERM_WRITE=>$WriteText, PERM_ADMIN=>$AdminText);
+$GLOBALS['PERM_NAMES'] = array(PERM_NONE=>$NoneText, PERM_READ=>$ReadText, PERM_WRITE=>$WriteText, PERM_AUDIT=>$AuditText, PERM_ADMIN=>$AdminText);
 
 /**
  * \class FO_Plugin

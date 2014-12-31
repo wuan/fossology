@@ -24,6 +24,8 @@
  * uploadtree.
  */
 
+use Fossology\Lib\Dao\ClearingDao;
+
 define("TITLE_license_list_files", _("List Files for License"));
 
 class LicenseListFiles extends FO_Plugin
@@ -64,6 +66,9 @@ class LicenseListFiles extends FO_Plugin
    */
   function Output()
   {
+	global $PG_CONN;
+	global $container;
+
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
@@ -89,6 +94,14 @@ class LicenseListFiles extends FO_Plugin
     if (empty($Page)) {
       $Page=0;
     }
+
+	// Get license key for setting concluded license
+    $sql = "SELECT rf_pk FROM license_ref WHERE rf_shortname='$rf_shortname'";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $row = pg_fetch_assoc($result);
+    $rf_pk = $row["rf_pk"];
+    pg_free_result($result);
 
     // Get upload_pk and $uploadtree_tablename
     $UploadtreeRec = GetSingleRec("uploadtree", "where uploadtree_pk=$uploadtree_pk");
@@ -231,6 +244,18 @@ class LicenseListFiles extends FO_Plugin
           $text = _("Exclude files with license");
           $Header .= "<br><a href=$URL>$text: $licstring.</a>";
 
+		  /* Enable setting of concluded license, only if not set earlier */
+          $clearingDao = $container->get('dao.clearing');
+		  $userId = $_SESSION['UserId'];
+          $permission = $_SESSION['UserLevel'];
+		  $uploadTreeId = $row['uploadtree_pk'];
+          $clearingDecWithLicenses = $clearingDao->getFileClearings($uploadTreeId);
+          if (empty($clearingDecWithLicenses) && $permission >= PERM_AUDIT) {
+            $text = _("Set concluded license");
+            $URLsetLic = "?mod=set-concluded-license&license=$rf_pk&uploadTreeId=$uploadTreeId&userId=$userId";
+            $Header .= "<br><a href=$URLsetLic>$text: $rf_shortname.</a>";
+          }
+
           $ok = true;
           /* exclude by type */
           if ($Excl) if (in_array($FileExt, $ExclArray)) $ok = false;
@@ -263,7 +288,30 @@ class LicenseListFiles extends FO_Plugin
 
             // show the entire license list as a single string with links to the files
             // in this container with that license.
-            $V .= "<td>$row[agent_name]: $licstring</td></tr>";
+            if (empty($clearingDecWithLicenses)) {
+              $V .= "<td>$row[agent_name]: $licstring</td></tr>";
+            }
+            else {
+              $V .= "<td>$row[agent_name]: $licstring";
+              $V .= "<br>concluded: ";
+              // Get latest concluded license decision id
+              // It was not possible to access array using *clearingId key, absolute access is used 
+              $lastClearing = array_values((array)$clearingDecWithLicenses[0]);
+              $clearingId = $lastClearing[3];
+              $clearingLicenses = $clearingDao->getFileClearingLicenses($clearingId);
+              $added = false;
+              foreach ($clearingLicenses as $licenseObj) {
+                if ($added) {
+                  $V .= ", ";
+                  $added = false;
+                }
+                $license = array_values((array)$licenseObj);
+                $licName = $license[1];
+                $V .= "$licName";
+                $added = true;
+              }
+              $V .= "</td></tr>";
+            }
             $V .= "<tr><td colspan=3><hr></td></tr>";  // separate files
           }
           $LastPfilePk = $pfile_pk;
